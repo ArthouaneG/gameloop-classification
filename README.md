@@ -1,5 +1,7 @@
 # GameLoop — Micro · Meso · Macro
 
+**Live site: [gameloop-classification.vercel.app](https://gameloop-classification.vercel.app)**
+
 An interactive video game classification site based on [Surnex](https://www.youtube.com/@real_surnex)'s Micro / Meso / Macro game design theory.
 
 ## What is it?
