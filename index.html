@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Game Classification — Micro · Meso · Macro</title>
+    <link rel="stylesheet" href="/src/style.css" />
+  </head>
+  <body>
+
+    <!-- ══ INTRO OVERLAY ══ -->
+    <div id="intro-overlay">
+      <svg class="intro-venn" viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <circle class="iv-micro" cx="170" cy="185" r="155" stroke="#00f5ff" stroke-width="2.5" fill="rgba(0,245,255,0.06)" />
+        <circle class="iv-macro" cx="330" cy="185" r="155" stroke="#ffd700" stroke-width="2.5" fill="rgba(255,215,0,0.06)" />
+        <circle class="iv-meso"  cx="250" cy="315" r="155" stroke="#b14fff" stroke-width="2.5" fill="rgba(177,79,255,0.06)" />
+      </svg>
+      <h1 class="intro-title">
+        <span class="micro-text">MICRO</span>
+        <span class="intro-sep"> · </span>
+        <span class="macro-text">MACRO</span>
+        <span class="intro-sep"> · </span>
+        <span class="meso-text">MESO</span>
+      </h1>
+      <p class="intro-subtitle" data-i18n="intro.subtitle">Système de classification du jeu vidéo</p>
+    </div>
+
+    <!-- ══ MAIN APP ══ -->
+    <div id="app">
+
+      <nav class="navbar">
+        <div class="nav-logo">
+          <svg width="28" height="26" viewBox="0 0 28 26" fill="none">
+            <circle cx="10" cy="10" r="9" stroke="#00f5ff" stroke-width="1.5" fill="rgba(0,245,255,0.08)"/>
+            <circle cx="18" cy="10" r="9" stroke="#ffd700" stroke-width="1.5" fill="rgba(255,215,0,0.08)"/>
+            <circle cx="14" cy="18" r="9" stroke="#b14fff" stroke-width="1.5" fill="rgba(177,79,255,0.08)"/>
+          </svg>
+          <span>GameLoop</span>
+        </div>
+        <ul class="nav-links">
+          <li><a href="#layers"   data-i18n="nav.layers">Les Layers</a></li>
+          <li><a href="#venn"     data-i18n="nav.venn">Diagramme</a></li>
+          <li><a href="#games"    data-i18n="nav.games">Jeux</a></li>
+          <li><a href="#chart"    data-i18n="nav.chart">Graphique</a></li>
+          <li><a href="#discover" data-i18n="nav.discover">Découverte</a></li>
+          <li><a href="#about"    data-i18n="nav.about">À propos</a></li>
+        </ul>
+      </nav>
+
+      <!-- HERO -->
+      <section class="hero">
+        <div class="hero-content">
+          <p class="hero-eyebrow" data-i18n="hero.eyebrow">Théorie du Design de Jeu</p>
+          <h1 class="hero-title" data-i18n="hero.title">Trois <em>layers</em><br/>pour tout classifier</h1>
+          <p class="hero-desc" data-i18n="hero.desc">
+            Chaque jeu vidéo s'articule autour de trois dimensions imbriquées : l'exécution brute, la gestion des probabilités et la maîtrise des systèmes. Leur intersection définit l'identité d'un jeu.
+          </p>
+          <div class="hero-pills">
+            <span class="pill micro-pill" data-i18n="hero.pill.micro">Micro = Exécution</span>
+            <span class="pill meso-pill"  data-i18n="hero.pill.meso">Meso = Probabilité</span>
+            <span class="pill macro-pill" data-i18n="hero.pill.macro">Macro = Systèmes</span>
+          </div>
+          <a href="#venn" class="cta-btn" data-i18n="hero.cta">Explorer le diagramme</a>
+        </div>
+
+        <div class="hero-venn">
+          <svg class="hero-venn-svg" viewBox="0 0 500 500" fill="none">
+            <circle cx="170" cy="185" r="155" stroke="#00f5ff" stroke-width="1.5" fill="rgba(0,245,255,0.05)"/>
+            <circle cx="330" cy="185" r="155" stroke="#ffd700" stroke-width="1.5" fill="rgba(255,215,0,0.05)"/>
+            <circle cx="250" cy="315" r="155" stroke="#b14fff" stroke-width="1.5" fill="rgba(177,79,255,0.05)"/>
+            <text x="16"  y="26"  fill="#00f5ff" text-anchor="start"  font-size="20" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Micro</text>
+            <text x="484" y="26"  fill="#ffd700" text-anchor="end"    font-size="20" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Macro</text>
+            <text x="250" y="494" fill="#b14fff" text-anchor="middle" font-size="20" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Meso</text>
+          </svg>
+        </div>
+      </section>
+
+      <!-- LAYERS SECTION -->
+      <section id="layers" class="layers-section">
+        <div class="section-header">
+          <h2 data-i18n="layers.title">Les trois layers du jeu vidéo</h2>
+          <p  data-i18n="layers.sub">Cliquez sur une carte pour ouvrir la bulle d'informations.</p>
+        </div>
+
+        <div class="layers-grid">
+
+          <!-- MICRO -->
+          <div class="layer-card micro-card">
+            <div class="lcard-top">
+              <div class="lcard-icon micro-icon">
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <circle cx="24" cy="24" r="20" stroke="#00f5ff" stroke-width="2" fill="none"/>
+                  <text x="24" y="30" text-anchor="middle" fill="#00f5ff" font-size="18" font-weight="bold">μ</text>
+                </svg>
+              </div>
+              <div>
+                <h3 class="micro-text">Micro</h3>
+                <span class="layer-badge micro-badge">Execution Layer</span>
+              </div>
+            </div>
+            <p class="lcard-tagline" data-i18n="micro.tagline">Ce que vous faites, la manière dont vous le faites.</p>
+            <p class="lcard-desc"    data-i18n="micro.desc">Le layer micro définit votre capacité d'exécution : aim, timing, skill individuel. C'est le domaine des actions concrètes, mesurables, répétables.</p>
+            <div class="lcard-examples" data-i18n="micro.tags">
+              <span class="tag">Aim</span><span class="tag">Timing</span><span class="tag">Combos</span><span class="tag">Précision</span>
+            </div>
+            <button class="info-btn" data-target="micro-bubble" data-i18n="micro.btn">En savoir plus</button>
+            <div class="info-bubble hidden" id="micro-bubble">
+              <button class="bubble-close" data-bubble="micro-bubble">✕</button>
+              <div data-i18n="micro.bubble">
+                <h4 class="micro-text">Execution Layer</h4>
+                <p>Le layer <strong>micro</strong> répond à la question : <em>« Est-ce que je suis capable d'exécuter cette action ? »</em></p>
+                <p>C'est la dimension physique et sensorimotrice du jeu. Elle est dominante lorsque le résultat dépend directement de votre précision, votre vitesse ou votre coordination.</p>
+                <ul>
+                  <li><strong>Exemples d'actions :</strong> viser une tête, maintenir un combo, placer un dash parfait</li>
+                  <li><strong>Compétence clé :</strong> muscle memory, réflexes, précision</li>
+                  <li><strong>Feedback :</strong> immédiat, visuel, sonore</li>
+                  <li><strong>Jeux purs :</strong> Osu!, Guitar Hero, Celeste</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- MESO -->
+          <div class="layer-card meso-card">
+            <div class="lcard-top">
+              <div class="lcard-icon meso-icon">
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <circle cx="24" cy="24" r="20" stroke="#b14fff" stroke-width="2" fill="none"/>
+                  <text x="24" y="30" text-anchor="middle" fill="#b14fff" font-size="18" font-weight="bold">P</text>
+                </svg>
+              </div>
+              <div>
+                <h3 class="meso-text">Meso</h3>
+                <span class="layer-badge meso-badge">Probability Layer</span>
+              </div>
+            </div>
+            <p class="lcard-tagline" data-i18n="meso.tagline">Ce que vous lisez, la façon dont vous vous adaptez.</p>
+            <p class="lcard-desc"    data-i18n="meso.desc">Le layer meso est celui de l'adaptabilité et de la probabilité. Vous gérez l'incertain — la position adverse, les probabilités de tirage, les rotations possibles.</p>
+            <div class="lcard-examples" data-i18n="meso.tags">
+              <span class="tag">Lecture</span><span class="tag">Adaptation</span><span class="tag">Probabilité</span><span class="tag">Anticipation</span>
+            </div>
+            <button class="info-btn" data-target="meso-bubble" data-i18n="meso.btn">En savoir plus</button>
+            <div class="info-bubble hidden" id="meso-bubble">
+              <button class="bubble-close" data-bubble="meso-bubble">✕</button>
+              <div data-i18n="meso.bubble">
+                <h4 class="meso-text">Probability Layer</h4>
+                <p>Le layer <strong>meso</strong> répond à la question : <em>« Qu'est-ce qui va probablement se passer ? »</em></p>
+                <p>C'est la dimension probabiliste et contextuelle du jeu. Elle domine lorsque le résultat dépend de votre capacité à lire une situation, anticiper l'adversaire et adapter votre stratégie en temps réel.</p>
+                <ul>
+                  <li><strong>Exemples d'actions :</strong> lire un bluff, anticiper un rush, adapter son deck, gérer une économie</li>
+                  <li><strong>Compétence clé :</strong> game sense, adaptabilité, lecture des patterns</li>
+                  <li><strong>Feedback :</strong> différé, contextuel</li>
+                  <li><strong>Jeux purs :</strong> Poker, Among Us, Hearthstone (partiel)</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- MACRO -->
+          <div class="layer-card macro-card">
+            <div class="lcard-top">
+              <div class="lcard-icon macro-icon">
+                <svg viewBox="0 0 48 48" width="48" height="48">
+                  <circle cx="24" cy="24" r="20" stroke="#ffd700" stroke-width="2" fill="none"/>
+                  <text x="24" y="30" text-anchor="middle" fill="#ffd700" font-size="18" font-weight="bold">Σ</text>
+                </svg>
+              </div>
+              <div>
+                <h3 class="macro-text">Macro</h3>
+                <span class="layer-badge macro-badge">Systems Layer</span>
+              </div>
+            </div>
+            <p class="lcard-tagline" data-i18n="macro.tagline">Comment vous jouez le jeu de manière mathématiquement optimale.</p>
+            <p class="lcard-desc"    data-i18n="macro.desc">Le layer macro est celui de la maîtrise des systèmes : économie, build orders, optimisation des ressources. Vous jouez le jeu lui-même, pas juste la partie en cours.</p>
+            <div class="lcard-examples" data-i18n="macro.tags">
+              <span class="tag">Build order</span><span class="tag">Économie</span><span class="tag">Meta</span><span class="tag">Optimisation</span>
+            </div>
+            <button class="info-btn" data-target="macro-bubble" data-i18n="macro.btn">En savoir plus</button>
+            <div class="info-bubble hidden" id="macro-bubble">
+              <button class="bubble-close" data-bubble="macro-bubble">✕</button>
+              <div data-i18n="macro.bubble">
+                <h4 class="macro-text">Systems Layer</h4>
+                <p>Le layer <strong>macro</strong> répond à la question : <em>« Comment puis-je jouer ce jeu de manière optimale ? »</em></p>
+                <p>C'est la dimension systémique et mathématique du jeu. Elle domine lorsque le résultat dépend de votre compréhension des systèmes sous-jacents — méta-jeu, théorie, optimisation.</p>
+                <ul>
+                  <li><strong>Exemples d'actions :</strong> calculer le meilleur build, optimiser l'économie de carte, maîtriser le méta</li>
+                  <li><strong>Compétence clé :</strong> théorie, analyse, optimisation systémique</li>
+                  <li><strong>Feedback :</strong> long terme, statistique</li>
+                  <li><strong>Jeux purs :</strong> Civilization VI, Factorio, Chess</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- VENN INTERACTIVE SECTION -->
+      <section id="venn" class="venn-section">
+        <div class="section-header">
+          <h2 data-i18n="venn.title">Diagramme de classification</h2>
+          <p  data-i18n="venn.sub">Cliquez sur une zone pour filtrer les jeux correspondants.</p>
+        </div>
+
+        <div class="venn-layout">
+          <div class="venn-wrap">
+            <svg id="main-venn" viewBox="0 0 500 500" fill="none" class="main-venn-svg">
+              <circle id="vc-micro" class="venn-circle vc-micro" cx="170" cy="185" r="155"/>
+              <circle id="vc-macro" class="venn-circle vc-macro" cx="330" cy="185" r="155"/>
+              <circle id="vc-meso"  class="venn-circle vc-meso"  cx="250" cy="315" r="155"/>
+              <circle class="vhit" data-zone="micro" cx="170" cy="185" r="155" fill="transparent"/>
+              <circle class="vhit" data-zone="macro" cx="330" cy="185" r="155" fill="transparent"/>
+              <circle class="vhit" data-zone="meso"  cx="250" cy="315" r="155" fill="transparent"/>
+              <text x="16"  y="26"  fill="#00f5ff" text-anchor="start"  font-size="18" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Micro</text>
+              <text x="484" y="26"  fill="#ffd700" text-anchor="end"    font-size="18" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Macro</text>
+              <text x="250" y="494" fill="#b14fff" text-anchor="middle" font-size="18" font-weight="700" letter-spacing="1" font-family="'Segoe UI',sans-serif">Meso</text>
+            </svg>
+            <div id="venn-tooltip" class="venn-tooltip hidden">
+              <span id="venn-tooltip-title"></span>
+              <span id="venn-tooltip-count"></span>
+            </div>
+          </div>
+
+          <div class="venn-info-panel" id="venn-info-panel">
+            <div class="vip-placeholder">
+              <p data-i18n="venn.placeholder">Cliquez sur une zone du diagramme pour voir les jeux qui lui correspondent.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- GAMES SECTION -->
+      <section id="games" class="games-section">
+        <div class="section-header">
+          <h2 data-i18n="games.title">Jeux classifiés</h2>
+          <p  data-i18n="games.sub">Position de chaque jeu dans le diagramme de Venn.</p>
+        </div>
+
+        <div class="filter-bar" id="filter-bar">
+          <button class="filter-btn active" data-filter="all"         data-i18n="filter.all">Tous</button>
+          <button class="filter-btn"        data-filter="micro"       data-i18n="filter.micro">Micro pur</button>
+          <button class="filter-btn"        data-filter="macro"       data-i18n="filter.macro">Macro pur</button>
+          <button class="filter-btn"        data-filter="meso"        data-i18n="filter.meso">Meso pur</button>
+          <button class="filter-btn"        data-filter="micro-macro" data-i18n="filter.micro-macro">Micro + Macro</button>
+          <button class="filter-btn"        data-filter="micro-meso"  data-i18n="filter.micro-meso">Micro + Meso</button>
+          <button class="filter-btn"        data-filter="meso-macro"  data-i18n="filter.meso-macro">Meso + Macro</button>
+          <button class="filter-btn"        data-filter="all-three"   data-i18n="filter.all-three">Les trois</button>
+        </div>
+
+        <div class="games-grid" id="games-grid"></div>
+      </section>
+
+      <!-- CHART SECTION -->
+      <section id="chart" class="chart-section">
+        <div class="section-header">
+          <h2 data-i18n="chart.title">Graphique comparatif</h2>
+          <p  data-i18n="chart.sub">Score de chaque layer pour une sélection de jeux (sur 10).</p>
+        </div>
+        <div class="chart-legend">
+          <span class="legend-item"><span class="legend-dot micro-dot"></span>Micro</span>
+          <span class="legend-item"><span class="legend-dot meso-dot"></span>Meso</span>
+          <span class="legend-item"><span class="legend-dot macro-dot"></span>Macro</span>
+        </div>
+        <div class="chart-container" id="chart-container"></div>
+      </section>
+
+      <!-- DISCOVER SECTION -->
+      <section id="discover" class="discover-section">
+        <div class="section-header">
+          <h2 data-i18n="discover.title">Découverte Steam</h2>
+          <p  data-i18n="discover.sub">Top jeux actuellement joués sur Steam — classifiez-les avec la communauté.</p>
+        </div>
+        <div id="discover-status" class="discover-status">
+          <div class="discover-loading">
+            <div class="loading-ring"></div>
+            <span data-i18n="discover.loading">Chargement du top Steam…</span>
+          </div>
+        </div>
+        <div class="games-grid" id="discover-grid"></div>
+      </section>
+
+      <!-- ABOUT SECTION -->
+      <section id="about" class="about-section">
+        <div class="section-header">
+          <h2 data-i18n="about.title">À propos</h2>
+          <p  data-i18n="about.sub">Ce site est une visualisation interactive de la théorie Micro · Meso · Macro du jeu vidéo, créée par <strong class="micro-text">Surnex</strong>.</p>
+        </div>
+
+        <!-- CREATOR HERO -->
+        <div class="creator-hero">
+          <div class="creator-venn" aria-hidden="true">
+            <svg viewBox="0 0 120 120" fill="none" width="100" height="100">
+              <circle cx="46" cy="44" r="38" stroke="#00f5ff" stroke-width="1.5" fill="rgba(0,245,255,0.06)"/>
+              <circle cx="74" cy="44" r="38" stroke="#ffd700" stroke-width="1.5" fill="rgba(255,215,0,0.06)"/>
+              <circle cx="60" cy="76" r="38" stroke="#b14fff" stroke-width="1.5" fill="rgba(177,79,255,0.06)"/>
+            </svg>
+          </div>
+          <div class="creator-info">
+            <p class="creator-tag" data-i18n="about.creator.tag">Théorie originale par</p>
+            <h2 class="creator-name">Surnex</h2>
+            <p class="creator-bio" data-i18n="about.creator.bio">
+              Surnex est un créateur de contenu YouTube américain anglophone spécialisé dans <em>la performance humaine et la cognition dans le jeu vidéo</em>. Actif depuis 2017, il explore les patterns universels qui déterminent pourquoi certains jeux exigent davantage des joueurs. Son cadre Micro / Meso / Macro offre une lentille rigoureuse pour comprendre la profondeur compétitive de tous les genres.
+            </p>
+            <div class="creator-stats">
+              <span class="creator-stat" data-i18n="about.stat.subs">24,7k abonnés</span>
+              <span class="creator-stat-sep">·</span>
+              <span class="creator-stat" data-i18n="about.stat.videos">124 vidéos</span>
+              <span class="creator-stat-sep">·</span>
+              <span class="creator-stat" data-i18n="about.stat.since">Depuis jan. 2017</span>
+            </div>
+            <div class="creator-links">
+              <a class="creator-link channel-link" href="https://www.youtube.com/@real_surnex" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                  <path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2C0 8.1 0 12 0 12s0 3.9.5 5.8a3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1C24 15.9 24 12 24 12s0-3.9-.5-5.8zM9.6 15.6V8.4l6.3 3.6-6.3 3.6z"/>
+                </svg>
+                <span data-i18n="about.link.yt">Chaîne YouTube</span>
+              </a>
+              <a class="creator-link discord-link" href="https://discord.gg/J3CyKXjYkY" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24" width="15" height="15" fill="currentColor">
+                  <path d="M20.3 4.4A19.1 19.1 0 0 0 15.5 3c-.2.4-.5.9-.7 1.3a17.7 17.7 0 0 0-5.6 0A13 13 0 0 0 8.5 3 19.2 19.2 0 0 0 3.6 4.4C.5 9.1-.3 13.7.1 18.2a19.3 19.3 0 0 0 5.9 3c.5-.6.9-1.3 1.3-2a12.5 12.5 0 0 1-2-.9l.5-.4a13.7 13.7 0 0 0 11.8 0l.5.4c-.6.4-1.3.7-2 .9.4.7.8 1.4 1.3 2a19.2 19.2 0 0 0 5.9-3c.5-5.1-.9-9.7-3.9-13.8ZM8 15.5c-1.2 0-2.2-1.1-2.2-2.5S6.7 10.5 8 10.5s2.2 1.1 2.2 2.5S9.2 15.5 8 15.5Zm8 0c-1.2 0-2.2-1.1-2.2-2.5s1-2.5 2.2-2.5 2.2 1.1 2.2 2.5-1 2.5-2.2 2.5Z"/>
+                </svg>
+                <span data-i18n="about.link.disc">Discord</span>
+              </a>
+              <a class="creator-link video-link-btn" href="https://www.youtube.com/watch?v=NgHvdCcmQ4o" target="_blank" rel="noopener" data-i18n="about.link.video">
+                Voir la vidéo →
+              </a>
+            </div>
+          </div>
+        </div>
+
+        <div class="about-grid">
+
+          <!-- VIDEO CARD -->
+          <div class="about-card video-card">
+            <h3 data-i18n="about.video.h">La vidéo originale</h3>
+            <p  data-i18n="about.video.p">Regardez la vidéo de Surnex pour comprendre en profondeur le cadre de classification et pourquoi il s'applique à tous les jeux compétitifs.</p>
+            <a class="video-thumb-link" href="https://www.youtube.com/watch?v=NgHvdCcmQ4o" target="_blank" rel="noopener">
+              <div class="video-thumb-wrap">
+                <img
+                  src="https://img.youtube.com/vi/NgHvdCcmQ4o/maxresdefault.jpg"
+                  alt="Micro Meso Macro theory by Surnex"
+                  class="video-thumb-img"
+                  onerror="this.src='https://img.youtube.com/vi/NgHvdCcmQ4o/hqdefault.jpg'"
+                />
+                <div class="video-play-overlay">
+                  <div class="play-icon">▶</div>
+                </div>
+              </div>
+              <span class="video-cta-label" data-i18n="about.video.cta">Regarder sur YouTube →</span>
+            </a>
+          </div>
+
+          <!-- THEORY CARD -->
+          <div class="about-card theory-card">
+            <h3 data-i18n="about.theory.h">Les trois layers</h3>
+            <p  data-i18n="about.theory.p">Selon Surnex, tout jeu peut être décomposé selon la proportion de ces trois dimensions :</p>
+            <ul class="about-list" data-i18n="about.theory.list">
+              <li>
+                <span class="micro-text">Micro — Execution Layer</span><br>
+                <span class="layer-def">Ce que tu fais physiquement : aim, timing, combos, précision. La compétence se prouve dans l'instant.</span>
+              </li>
+              <li>
+                <span class="meso-text">Meso — Probability Layer</span><br>
+                <span class="layer-def">Ce que tu lis et anticipes : probabilité, adaptation, game sense. Tu joues contre l'incertain.</span>
+              </li>
+              <li>
+                <span class="macro-text">Macro — Systems Layer</span><br>
+                <span class="layer-def">Comment tu optimises : économie, méta, build orders. Tu joues le jeu mathématiquement.</span>
+              </li>
+            </ul>
+            <p class="about-note" data-i18n="about.theory.note">Les jeux les plus forts exigent la maîtrise des trois — c'est la zone centrale du diagramme de Venn.</p>
+          </div>
+
+          <!-- SITE CARD -->
+          <div class="about-card tech-card">
+            <h3 data-i18n="about.site.h">Ce site</h3>
+            <p  data-i18n="about.site.p">GameLoop Classification est une visualisation interactive non-officielle basée sur le cadre de Surnex. Explorez le Top Steam selon cette lentille et votez pour chaque jeu.</p>
+            <ul class="about-list tech-list" data-i18n="about.site.list">
+              <li><strong>Vite.js</strong> — build moderne &amp; rapide</li>
+              <li><strong>Anime.js v4</strong> — animations fluides</li>
+              <li><strong>Steam API</strong> — données en temps réel</li>
+              <li><strong>localStorage</strong> — votes communautaires</li>
+            </ul>
+            <p class="about-note" data-i18n="about.site.note">
+              Toute la classification est basée sur le cadre de Surnex.
+              <a href="https://www.youtube.com/@real_surnex" target="_blank" rel="noopener" class="inline-link">Suivez-le sur YouTube.</a>
+            </p>
+          </div>
+
+        </div>
+      </section>
+
+      <footer class="footer">
+        <svg width="44" height="40" viewBox="0 0 44 40" fill="none">
+          <circle cx="15" cy="16" r="13" stroke="#00f5ff" stroke-width="1.5" fill="rgba(0,245,255,0.06)"/>
+          <circle cx="29" cy="16" r="13" stroke="#ffd700" stroke-width="1.5" fill="rgba(255,215,0,0.06)"/>
+          <circle cx="22" cy="28" r="13" stroke="#b14fff" stroke-width="1.5" fill="rgba(177,79,255,0.06)"/>
+        </svg>
+        <p data-i18n="footer.text">Game Loop Classification System — Cadre Micro / Meso / Macro du game design</p>
+      </footer>
+
+    </div>
+
+    <!-- GAME MODAL -->
+    <div id="game-modal" class="game-modal hidden" role="dialog" aria-modal="true">
+      <div class="modal-backdrop"></div>
+      <div class="modal-panel">
+        <button class="modal-close" aria-label="Fermer">✕</button>
+        <div id="modal-content" class="modal-content"></div>
+      </div>
+    </div>
+
+    <!-- LANG SWITCHER — fixed bottom-left, not anchored to scroll -->
+    <div id="lang-switcher" class="lang-switcher">
+      <button class="lang-btn" data-lang="fr">FR</button>
+      <button class="lang-btn" data-lang="en">EN</button>
+    </div>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
