@@ -3,6 +3,7 @@ import { animate, stagger, createTimeline } from 'animejs';
 import { fetchMostPlayed, fetchAppDetails, fetchGameDetail, steamHeaderUrl, guessZone } from './steam.js';
 import { castVote, getUserVote, getTotalVotes, getVoteDistribution } from './votes.js';
 import { t, currentLang, setLang, steamLang } from './i18n.js';
+import { fetchSteamProfile, analyzePlaystyle } from './steam-profile.js';
 
 /* ══════════════════════════════════════════════════════════════
    GAME DATA
@@ -178,6 +179,137 @@ function applyTranslations() {
     const val = t(el.dataset.i18n);
     if (val && val !== el.dataset.i18n) el.innerHTML = val;
   });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const val = t(el.dataset.i18nPlaceholder);
+    if (val && val !== el.dataset.i18nPlaceholder) el.placeholder = val;
+  });
+}
+
+/* ══ PROFILE SECTION ══ */
+let lastProfileResult = null; // { profile, analysis } cached for lang switch re-render
+
+function renderProfileResult(profile, analysis) {
+  const result = document.getElementById('profile-result');
+  if (!result) return;
+
+  const activeCircles = ZONE_INFO[analysis.zone]?.circles ?? [];
+  const locale = currentLang === 'fr' ? 'fr-FR' : 'en-US';
+
+  function circleStyle(name) {
+    const active = activeCircles.includes(name);
+    const colors = { micro: ['#00f5ff', 'rgba(0,245,255,0.22)'], macro: ['#ffd700', 'rgba(255,215,0,0.22)'], meso: ['#b14fff', 'rgba(177,79,255,0.22)'] };
+    const [stroke, fill] = colors[name];
+    return `stroke="${stroke}" stroke-width="${active ? 2.5 : 1}" fill="${active ? fill : colors[name][1].replace('0.22','0.04')}"`;
+  }
+
+  const vennSvg = `<svg viewBox="0 0 200 210" fill="none" width="148" height="156">
+    <circle cx="68" cy="72" r="60" ${circleStyle('micro')}/>
+    <circle cx="132" cy="72" r="60" ${circleStyle('macro')}/>
+    <circle cx="100" cy="122" r="60" ${circleStyle('meso')}/>
+    <text x="14" y="18" fill="#00f5ff" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Micro</text>
+    <text x="186" y="18" fill="#ffd700" text-anchor="end" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Macro</text>
+    <text x="100" y="204" fill="#b14fff" text-anchor="middle" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Meso</text>
+  </svg>`;
+
+  result.innerHTML = `
+    <div class="profile-card">
+      <div class="profile-user">
+        <img class="profile-avatar" src="${profile.avatar}" alt="${profile.name}">
+        <div class="profile-user-info">
+          <h3 class="profile-name">${profile.name}</h3>
+          <p class="profile-stats-text">${t('profile.result.games').replace('%n', analysis.matchedCount)}<span class="profile-stats-dim"> / ${analysis.totalGames.toLocaleString(locale)}</span></p>
+        </div>
+      </div>
+
+      <div class="profile-analysis-grid">
+        <div class="profile-scores">
+          <p class="profile-section-label">${t('profile.result.style')}</p>
+          ${['micro','meso','macro'].map(l => `
+            <div class="profile-score-row">
+              <span class="modal-bar-lbl ${l}-text">${l[0].toUpperCase()+l.slice(1)}</span>
+              <div class="bar-track"><div class="bar-fill ${l}" style="width:${analysis[l]*10}%"></div></div>
+              <span class="chart-score">${analysis[l].toFixed(1)}</span>
+            </div>`).join('')}
+          <div class="profile-zone-result">
+            <span class="game-zone-badge badge-${analysis.zone}">${zoneLabel(analysis.zone).toUpperCase()}</span>
+            <span class="profile-zone-sub">${zoneSub(analysis.zone)}</span>
+          </div>
+        </div>
+        <div class="profile-venn-mini">${vennSvg}</div>
+      </div>
+
+      ${analysis.matchedGames.length ? `
+      <div class="profile-top-games">
+        <p class="profile-section-label">${t('profile.result.top')}</p>
+        <div class="profile-games-row">
+          ${analysis.matchedGames.map(g => `
+            <div class="profile-game-pill">
+              <span class="profile-game-n">${g.name}</span>
+              <span class="profile-game-h">${Math.round(g.playtime/60)}${t('profile.result.hours')}</span>
+            </div>`).join('')}
+        </div>
+      </div>` : ''}
+    </div>`;
+
+  result.classList.remove('hidden');
+  animate(result.querySelector('.profile-card'), { opacity:[0,1], translateY:[16,0], duration:480, ease:'outExpo' });
+}
+
+function setupProfileSection() {
+  const btn    = document.getElementById('profile-analyze-btn');
+  const input  = document.getElementById('profile-input');
+  const result = document.getElementById('profile-result');
+  if (!btn || !input || !result) return;
+
+  // Restore cached result from localStorage
+  try {
+    const cached = JSON.parse(localStorage.getItem('gameloop_steam_profile') ?? 'null');
+    if (cached?.profile && cached?.analysis) {
+      lastProfileResult = cached;
+      input.value = cached.profile.profileUrl ?? '';
+      renderProfileResult(cached.profile, cached.analysis);
+    }
+  } catch {}
+
+  async function run() {
+    const q = input.value.trim();
+    if (!q) { input.focus(); return; }
+
+    result.classList.remove('hidden');
+    result.innerHTML = `<div class="profile-loading"><div class="loading-ring"></div><span>${t('profile.loading')}</span></div>`;
+
+    try {
+      const profile = await fetchSteamProfile(q);
+
+      if (profile.games.length === 0) {
+        result.innerHTML = `<p class="profile-error">${t('profile.error.private')}</p>`;
+        return;
+      }
+
+      const analysis = analyzePlaystyle(profile.games, GAMES);
+      if (!analysis) {
+        result.innerHTML = `<p class="profile-error">${t('profile.result.nomatch')}</p>`;
+        return;
+      }
+
+      lastProfileResult = { profile, analysis };
+      renderProfileResult(profile, analysis);
+
+      // Cache without the full game list to avoid localStorage quota
+      const slim = { name: profile.name, avatar: profile.avatar, profileUrl: profile.profileUrl, steamId: profile.steamId };
+      localStorage.setItem('gameloop_steam_profile', JSON.stringify({ profile: slim, analysis }));
+
+    } catch (err) {
+      const msg =
+        err.message === 'profile_not_found'     ? t('profile.error.notfound') :
+        err.message === 'STEAM_API_KEY not set' ? t('profile.error.nokey')    :
+                                                   t('profile.error.generic');
+      result.innerHTML = `<p class="profile-error">${msg}</p>`;
+    }
+  }
+
+  btn.addEventListener('click', run);
+  input.addEventListener('keydown', e => { if (e.key === 'Enter') run(); });
 }
 
 /* ══ VOTE UI ══ */
@@ -581,6 +713,11 @@ function switchLang(lang) {
   if (panel && !panel.querySelector('.vip-placeholder')) {
     panel.innerHTML = `<div class="vip-placeholder"><p>${t('venn.placeholder')}</p></div>`;
   }
+
+  // Re-render profile result with new language if one was analyzed
+  if (lastProfileResult) {
+    renderProfileResult(lastProfileResult.profile, lastProfileResult.analysis);
+  }
 }
 
 function setupLangSwitcher() {
@@ -638,6 +775,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupVenn();
   setupReveal();
   setupModal();
+  setupProfileSection();
   setupLangSwitcher();
   requestAnimationFrame(()=>requestAnimationFrame(runIntro));
   loadSteamDiscover();

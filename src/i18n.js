@@ -146,6 +146,27 @@ const T = {
         <li><strong>localStorage</strong> — votes communautaires</li>`,
     'about.site.note':  'Toute la classification est basée sur le cadre de Surnex. <a href="https://www.youtube.com/@real_surnex" target="_blank" rel="noopener" class="inline-link">Suivez-le sur YouTube.</a>',
 
+    // ── PROFILE SECTION
+    'nav.profile':             'Mon Profil',
+    'profile.title':           'Quel est mon style de jeux ?',
+    'profile.sub':             'Entrez votre URL de profil Steam pour analyser votre bibliothèque et découvrir votre profil Micro · Meso · Macro.',
+    'profile.hint':            'Ex. : steamcommunity.com/id/votrenom ou votre SteamID64 — le profil doit être public',
+    'profile.input.placeholder':'URL ou nom Steam...',
+    'profile.btn':             'Analyser',
+    'profile.loading':         'Analyse en cours…',
+    'profile.error.notfound':  'Profil introuvable. Vérifiez l\'URL et assurez-vous que votre profil Steam est public.',
+    'profile.error.private':   'Ce profil est privé. Rendez votre bibliothèque publique dans les paramètres Steam.',
+    'profile.error.nokey':     'Clé Steam non configurée — cette fonctionnalité est disponible sur le site en ligne.',
+    'profile.error.generic':   'Erreur de connexion Steam. Réessayez plus tard.',
+    'profile.result.games':    '%n jeux analysés',
+    'profile.result.style':    'Votre profil de jeu',
+    'profile.result.top':      'Jeux qui définissent votre style',
+    'profile.result.hours':    'h',
+    'profile.result.nomatch':  'Aucun de vos jeux ne correspond à notre base de données.',
+
+    // ── ABOUT GITHUB LINK
+    'about.link.github': 'Code source',
+
     // ── FOOTER
     'footer.text': 'Game Loop Classification System — Cadre Micro / Meso / Macro du game design',
 
@@ -321,6 +342,27 @@ const T = {
         <li><strong>Steam API</strong> — live game data</li>
         <li><strong>localStorage</strong> — community votes</li>`,
     'about.site.note':  'All classification is based on Surnex\'s framework. <a href="https://www.youtube.com/@real_surnex" target="_blank" rel="noopener" class="inline-link">Follow him on YouTube.</a>',
+
+    // ── PROFILE SECTION
+    'nav.profile':             'My Profile',
+    'profile.title':           "What's my playstyle?",
+    'profile.sub':             'Enter your Steam profile URL to analyze your library and discover your Micro · Meso · Macro profile.',
+    'profile.hint':            'E.g.: steamcommunity.com/id/yourname or your SteamID64 — profile must be public',
+    'profile.input.placeholder':'Steam URL or username...',
+    'profile.btn':             'Analyze',
+    'profile.loading':         'Analyzing…',
+    'profile.error.notfound':  'Profile not found. Check the URL and make sure your Steam profile is public.',
+    'profile.error.private':   'This profile is private. Make your game library public in Steam settings.',
+    'profile.error.nokey':     'Steam key not configured — this feature is available on the live site.',
+    'profile.error.generic':   'Steam connection error. Please try again later.',
+    'profile.result.games':    '%n games analyzed',
+    'profile.result.style':    'Your gaming profile',
+    'profile.result.top':      'Games that define your style',
+    'profile.result.hours':    'h',
+    'profile.result.nomatch':  'None of your games match our database yet.',
+
+    // ── ABOUT GITHUB LINK
+    'about.link.github': 'Source code',
 
     // ── FOOTER
     'footer.text': 'Game Loop Classification System — Micro / Meso / Macro game design framework',
