@@ -11,24 +11,19 @@ export default async function handler(req, res) {
   let steamid = null;
   let vanity  = null;
 
-  // Parse Steam URL, SteamID64, or plain username
   const profileMatch = raw.match(/\/profiles\/(\d{15,})/);
   const idMatch      = raw.match(/\/id\/([^/?#\s]+)/);
-  if (profileMatch)              steamid = profileMatch[1];
-  else if (idMatch)              vanity  = idMatch[1];
+  if (profileMatch)               steamid = profileMatch[1];
+  else if (idMatch)               vanity  = idMatch[1];
   else if (/^\d{15,}$/.test(raw)) steamid = raw;
-  else                            vanity  = raw;
+  else                             vanity  = raw;
 
-  // Resolve vanity URL to SteamID64
   if (vanity) {
     const data = await safeFetch(
       `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v1/?key=${apiKey}&vanityurl=${encodeURIComponent(vanity)}`
     );
-    if (data?.response?.success === 1) {
-      steamid = data.response.steamid;
-    } else {
-      return res.status(404).json({ error: 'profile_not_found' });
-    }
+    if (data?.response?.success === 1) steamid = data.response.steamid;
+    else return res.status(404).json({ error: 'profile_not_found' });
   }
 
   const [summary, games] = await Promise.all([
@@ -45,6 +40,29 @@ export default async function handler(req, res) {
     playtime: g.playtime_forever ?? 0,
   }));
 
+  // Top 20 most played — fetch genres + content descriptors for analysis
+  const top20 = gameList
+    .filter(g => g.playtime > 0)
+    .sort((a, b) => b.playtime - a.playtime)
+    .slice(0, 20);
+
+  let topGames = top20;
+  if (top20.length > 0) {
+    const ids   = top20.map(g => g.appid).join(',');
+    const store = await safeFetch(
+      `https://store.steampowered.com/api/appdetails?appids=${ids}&filters=genres,content_descriptors`
+    );
+    topGames = top20.map(g => {
+      const entry = store?.[String(g.appid)];
+      const d     = entry?.success ? entry.data : null;
+      return {
+        ...g,
+        genres:               d?.genres?.map(x => x.description) ?? [],
+        contentDescriptorIds: d?.content_descriptors?.ids        ?? [],
+      };
+    });
+  }
+
   res.setHeader('Cache-Control', 's-maxage=300');
   return res.status(200).json({
     steamId:    steamid,
@@ -52,6 +70,7 @@ export default async function handler(req, res) {
     avatar:     player.avatarmedium,
     profileUrl: player.profileurl,
     games:      gameList,
+    topGames,
   });
 }
 

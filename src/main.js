@@ -3,7 +3,7 @@ import { animate, stagger, createTimeline } from 'animejs';
 import { fetchMostPlayed, fetchAppDetails, fetchGameDetail, steamHeaderUrl, guessZone } from './steam.js';
 import { castVote, getUserVote, getTotalVotes, getVoteDistribution } from './votes.js';
 import { t, currentLang, setLang, steamLang } from './i18n.js';
-import { fetchSteamProfile, analyzePlaystyle } from './steam-profile.js';
+import { fetchSteamProfile, analyzePlaystyle, checkGoonerEgg } from './steam-profile.js';
 
 /* ══════════════════════════════════════════════════════════════
    GAME DATA
@@ -197,9 +197,13 @@ function renderProfileResult(profile, analysis) {
 
   function circleStyle(name) {
     const active = activeCircles.includes(name);
-    const colors = { micro: ['#00f5ff', 'rgba(0,245,255,0.22)'], macro: ['#ffd700', 'rgba(255,215,0,0.22)'], meso: ['#b14fff', 'rgba(177,79,255,0.22)'] };
-    const [stroke, fill] = colors[name];
-    return `stroke="${stroke}" stroke-width="${active ? 2.5 : 1}" fill="${active ? fill : colors[name][1].replace('0.22','0.04')}"`;
+    const colors = {
+      micro: ['#00f5ff', 'rgba(0,245,255,0.22)', 'rgba(0,245,255,0.04)'],
+      macro: ['#ffd700', 'rgba(255,215,0,0.22)',  'rgba(255,215,0,0.04)'],
+      meso:  ['#b14fff', 'rgba(177,79,255,0.22)', 'rgba(177,79,255,0.04)'],
+    };
+    const [stroke, activeFill, dimFill] = colors[name];
+    return `stroke="${stroke}" stroke-width="${active ? 2.5 : 1}" fill="${active ? activeFill : dimFill}"`;
   }
 
   const vennSvg = `<svg viewBox="0 0 200 210" fill="none" width="148" height="156">
@@ -211,13 +215,18 @@ function renderProfileResult(profile, analysis) {
     <text x="100" y="204" fill="#b14fff" text-anchor="middle" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Meso</text>
   </svg>`;
 
+  const goonerHtml = analysis.isGooner ? `
+    <div class="profile-gooner-egg" id="profile-gooner-egg">
+      <div class="gooner-circle">GOONER</div>
+    </div>` : '';
+
   result.innerHTML = `
     <div class="profile-card">
       <div class="profile-user">
         <img class="profile-avatar" src="${profile.avatar}" alt="${profile.name}">
         <div class="profile-user-info">
           <h3 class="profile-name">${profile.name}</h3>
-          <p class="profile-stats-text">${t('profile.result.games').replace('%n', analysis.matchedCount)}<span class="profile-stats-dim"> / ${analysis.totalGames.toLocaleString(locale)}</span></p>
+          <p class="profile-stats-text">${t('profile.result.games').replace('%n', analysis.analyzedTotal)}<span class="profile-stats-dim"> / top ${analysis.totalGames}</span></p>
         </div>
       </div>
 
@@ -249,10 +258,20 @@ function renderProfileResult(profile, analysis) {
             </div>`).join('')}
         </div>
       </div>` : ''}
+
+      ${goonerHtml}
     </div>`;
 
   result.classList.remove('hidden');
   animate(result.querySelector('.profile-card'), { opacity:[0,1], translateY:[16,0], duration:480, ease:'outExpo' });
+
+  // Animate gooner egg separately with a pop if present
+  if (analysis.isGooner) {
+    setTimeout(() => {
+      const egg = document.getElementById('profile-gooner-egg');
+      if (egg) animate(egg, { opacity:[0,1], scale:[0.4,1], duration:600, ease:'outBack', delay:300 });
+    }, 0);
+  }
 }
 
 function setupProfileSection() {
@@ -286,16 +305,18 @@ function setupProfileSection() {
         return;
       }
 
-      const analysis = analyzePlaystyle(profile.games, GAMES);
+      const analysis = analyzePlaystyle(profile.topGames ?? [], GAMES);
       if (!analysis) {
         result.innerHTML = `<p class="profile-error">${t('profile.result.nomatch')}</p>`;
         return;
       }
 
+      analysis.isGooner = checkGoonerEgg(profile.topGames ?? []);
+
       lastProfileResult = { profile, analysis };
       renderProfileResult(profile, analysis);
 
-      // Cache without the full game list to avoid localStorage quota
+      // Cache without the full game lists to avoid localStorage quota
       const slim = { name: profile.name, avatar: profile.avatar, profileUrl: profile.profileUrl, steamId: profile.steamId };
       localStorage.setItem('gameloop_steam_profile', JSON.stringify({ profile: slim, analysis }));
 

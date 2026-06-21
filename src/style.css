@@ -1030,6 +1030,26 @@ section { padding: 96px 80px; }
 .profile-game-n { color: var(--text); }
 .profile-game-h { color: var(--dim); font-size: 11px; }
 
+/* ══ GOONER EGG ══ */
+.profile-gooner-egg {
+  display: flex; justify-content: center; padding-top: 8px;
+  opacity: 0; /* animated in via JS */
+}
+.gooner-circle {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: rgba(255, 20, 147, 0.12);
+  border: 2px solid #ff1493;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 800; letter-spacing: 0.12em;
+  color: #ff1493;
+  box-shadow: 0 0 22px rgba(255, 20, 147, 0.45), inset 0 0 18px rgba(255, 20, 147, 0.1);
+  animation: gooner-pulse 2.4s ease-in-out infinite;
+}
+@keyframes gooner-pulse {
+  0%, 100% { box-shadow: 0 0 22px rgba(255,20,147,0.45), inset 0 0 18px rgba(255,20,147,0.1); }
+  50%       { box-shadow: 0 0 40px rgba(255,20,147,0.75), inset 0 0 28px rgba(255,20,147,0.2); }
+}
+
 /* ══ RESPONSIVE ══ */
 @media (max-width: 920px) {
   .hero          { flex-direction: column; padding: 56px 24px 48px; text-align: center; }
