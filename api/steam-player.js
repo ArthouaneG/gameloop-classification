@@ -48,12 +48,18 @@ export default async function handler(req, res) {
 
   let topGames = top20;
   if (top20.length > 0) {
-    const ids   = top20.map(g => g.appid).join(',');
-    const store = await safeFetch(
-      `https://store.steampowered.com/api/appdetails?appids=${ids}&filters=genres,content_descriptors`
+    // Individual requests are far more reliable than batch — Steam's appdetails API
+    // silently drops games in a comma-separated batch, leaving most with empty genres.
+    const storeResults = await Promise.all(
+      top20.map(g =>
+        safeFetch(
+          `https://store.steampowered.com/api/appdetails?appids=${g.appid}&filters=genres,content_descriptors`,
+          5000
+        )
+      )
     );
-    topGames = top20.map(g => {
-      const entry = store?.[String(g.appid)];
+    topGames = top20.map((g, i) => {
+      const entry = storeResults[i]?.[String(g.appid)];
       const d     = entry?.success ? entry.data : null;
       return {
         ...g,
@@ -74,9 +80,9 @@ export default async function handler(req, res) {
   });
 }
 
-async function safeFetch(url) {
+async function safeFetch(url, timeoutMs = 8000) {
   try {
-    const r = await fetch(url, { signal: AbortSignal.timeout(8000) });
+    const r = await fetch(url, { signal: AbortSignal.timeout(timeoutMs) });
     return r.ok ? r.json() : null;
   } catch { return null; }
 }
