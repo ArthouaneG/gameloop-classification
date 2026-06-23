@@ -1,6 +1,6 @@
 import './style.css';
 import { animate, stagger, createTimeline } from 'animejs';
-import { fetchMostPlayed, fetchAppDetails, fetchGameDetail, steamHeaderUrl, guessZone } from './steam.js';
+import { fetchGameDetail, steamHeaderUrl } from './steam.js';
 import { castVote, getUserVote, getTotalVotes, getVoteDistribution } from './votes.js';
 import { t, currentLang, setLang, steamLang } from './i18n.js';
 import { fetchSteamProfile, analyzePlaystyle, checkGoonerEgg } from './steam-profile.js';
@@ -103,9 +103,6 @@ const GAMES = [
   { appid:590380,  name:'Into the Breach',           zone:'meso-macro', genre:'Tactique',      micro:3,  meso:8,  macro:8,  desc:'Puzzle tactique de positionnement + méta-progression systémique entre les runs.' },
   { appid:578080,  name:'PUBG: Battlegrounds',       zone:'all-three',  genre:'Battle Royale', micro:8,  meso:8,  macro:7,  desc:'Gunplay (micro) + lecture de zone et loot (meso) + connaissance des compounds et rotations de map (macro).' },
 ];
-
-/* ══ SET D'APPIDS CONNUS ══ */
-const KNOWN_APPIDS = new Set(GAMES.filter(g => g.appid).map(g => g.appid));
 
 /* ══ CHART GAMES ══ */
 const CHART_GAMES = [
@@ -501,59 +498,6 @@ function setupVenn() {
   });
 }
 
-/* ══ STEAM DISCOVER ══ */
-async function loadSteamDiscover() {
-  const statusEl = document.getElementById('discover-status');
-  const grid     = document.getElementById('discover-grid');
-
-  try {
-    const ranks = await fetchMostPlayed();
-    if (!ranks.length) throw new Error('no data');
-
-    ranks.forEach(r => {
-      const game = GAMES.find(g => g.appid === r.appid);
-      if (game) game.peak_in_game = r.peak_in_game;
-    });
-
-    const unknownIds = ranks
-      .filter(r => !KNOWN_APPIDS.has(r.appid))
-      .slice(0, 20)
-      .map(r => ({ appid: r.appid, peak_in_game: r.peak_in_game }));
-
-    if (!unknownIds.length) {
-      statusEl.innerHTML = '';
-      return;
-    }
-
-    const details = await fetchAppDetails(unknownIds.map(x => x.appid));
-
-    unknownIds.forEach(({ appid, peak_in_game }) => {
-      const info = details[appid.toString()];
-      if (!info) return;
-
-      const guessed = guessZone(info.genres);
-      const card = createGameCard({
-        appid,
-        name:         info.name,
-        header_image: info.header_image,
-        genre:        info.genres.join(', ') || '—',
-        desc:         '',
-        zone:         guessed,
-        peak_in_game,
-      }, true);
-      grid.appendChild(card);
-    });
-
-    statusEl.innerHTML = '';
-    if (grid.children.length) {
-      animate('#discover-grid .game-card', { opacity:[0,1], translateY:[14,0], duration:450, delay:stagger(30), ease:'outQuart' });
-    }
-
-  } catch {
-    statusEl.innerHTML = `<span class="discover-error">${t('discover.error')}</span>`;
-  }
-}
-
 /* ══ BAR CHART ══ */
 function renderChart() {
   const container = document.getElementById('chart-container');
@@ -720,15 +664,6 @@ function switchLang(lang) {
   const activeFilter = document.querySelector('#filter-bar .filter-btn.active')?.dataset.filter ?? 'all';
   renderGames(activeFilter === 'all' ? 'all' : activeFilter);
 
-  // Update discover badges + peak text (without re-fetching)
-  document.querySelectorAll('.unclass-badge').forEach(el =>
-    el.textContent = t('badge.unclass')
-  );
-  const locale = lang === 'fr' ? 'fr-FR' : 'en-US';
-  document.querySelectorAll('.peak-players[data-peak]').forEach(el => {
-    el.textContent = t('peak.players').replace('%n', Number(el.dataset.peak).toLocaleString(locale));
-  });
-
   // Reset venn panel to placeholder (labels were in old language)
   const panel = document.getElementById('venn-info-panel');
   if (panel && !panel.querySelector('.vip-placeholder')) {
@@ -799,5 +734,4 @@ document.addEventListener('DOMContentLoaded', () => {
   setupProfileSection();
   setupLangSwitcher();
   requestAnimationFrame(()=>requestAnimationFrame(runIntro));
-  loadSteamDiscover();
 });

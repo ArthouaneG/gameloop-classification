@@ -1,12 +1,15 @@
 /**
- * Seed script — builds data/games.db with ~5000 popular Steam games.
+ * Seed script — builds data/games.db with the most popular Steam games.
  *
- * 1. Fetches 5 pages from SteamSpy bulk API (appid + name, sorted by CCU)
- * 2. For each game, fetches genres + content_descriptors from Steam Store API (individual)
- * 3. Stores genre-based scores (or exact curated scores) + adult flag in SQLite
+ * Strategy:
+ * 1. Fetch 5 SteamSpy bulk pages (5000 games with CCU data)
+ * 2. Sort ALL games by CCU descending → take top N by actual popularity
+ * 3. For each: fetch SteamSpy appdetails → real genre + adult tags
+ * 4. Estimate Micro/Meso/Macro scores from genre; curated games use exact scores
  *
- * Usage:  node scripts/seed-games.js [pages=5]
- * Time:   ~10 min for 5000 games (rate-limited to ~5 req/s on Steam Store)
+ * Usage:   node scripts/seed-games.js [count=2500]
+ * Default: 2500 games (takes ~15-20 min due to SteamSpy rate limit)
+ * Quick:   node scripts/seed-games.js 500
  */
 import Database from 'better-sqlite3';
 import { mkdirSync, existsSync } from 'fs';
@@ -17,7 +20,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT      = path.join(__dirname, '..');
 const DB_PATH   = path.join(ROOT, 'data', 'games.db');
 
-// ── Curated games with hand-crafted scores (mirrors appid-bearing entries in main.js GAMES)
+// ── Curated games with hand-crafted scores
 const CURATED = [
   { appid: 504230,  name: 'Celeste',                  micro: 9,  meso: 2,  macro: 2,  zone: 'micro' },
   { appid: 322170,  name: 'Geometry Dash',             micro: 10, meso: 1,  macro: 1,  zone: 'micro' },
@@ -94,7 +97,7 @@ const CURATED = [
   { appid: 578080,  name: 'PUBG: Battlegrounds',         micro: 8,  meso: 8,  macro: 7,  zone: 'all-three' },
 ];
 
-// ── Genre → Micro/Meso/Macro scores (case-insensitive match against Steam genre names)
+// ── Genre → Micro/Meso/Macro (case-insensitive match against Steam/SteamSpy genre names)
 const GENRE_SCORES = {
   'action':                { micro: 8, meso: 5, macro: 4 },
   'adventure':             { micro: 4, meso: 6, macro: 5 },
@@ -108,12 +111,15 @@ const GENRE_SCORES = {
   'strategy':              { micro: 2, meso: 6, macro: 9 },
 };
 
-// Steam content_descriptor IDs for actual sexual/nudity content.
-// ID 2 = "Frequent Violence or Gore" — NOT adult, fires for almost all action games.
-const ADULT_DESCRIPTOR_IDS = new Set([1, 3, 4]);
+// SteamSpy tags that indicate adult/nudity content
+const ADULT_TAGS = new Set([
+  'Nudity', 'Sexual Content', 'Adult Content', 'NSFW',
+  'Hentai', 'Explicit Sexual Content', 'Eroge', 'Sexual',
+  'Mature Sexual Content', 'Adult Only',
+]);
 
-function estimateFromGenres(genres) {
-  const known = genres
+function estimateFromGenres(genreStr) {
+  const known = (genreStr || '').split(',')
     .map(g => GENRE_SCORES[g.toLowerCase().trim()])
     .filter(Boolean);
   if (!known.length) return null;
@@ -141,53 +147,57 @@ function computeZone(micro, meso, macro) {
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
-async function fetchSteamSpyPage(page) {
+async function fetchBulkPage(page) {
   const res = await fetch(`https://steamspy.com/api.php?request=all&page=${page}`);
   if (!res.ok) throw new Error(`SteamSpy page ${page}: HTTP ${res.status}`);
   return res.json();
 }
 
-// Fetch genres + content_descriptors for one appid from Steam Store.
-// Returns { genres: string[], adult: boolean } or null on failure.
-async function fetchStoreData(appid) {
+// Fetch full details for one appid from SteamSpy (genre + tags).
+async function fetchSpyDetails(appid) {
   try {
-    const res = await fetch(
-      `https://store.steampowered.com/api/appdetails?appids=${appid}&filters=genres,content_descriptors`,
-      { signal: AbortSignal.timeout(8000) }
-    );
+    const res = await fetch(`https://steamspy.com/api.php?request=appdetails&appid=${appid}`,
+      { signal: AbortSignal.timeout(10000) });
     if (!res.ok) return null;
-    const json = await res.json();
-    const entry = json?.[String(appid)];
-    if (!entry?.success) return null;
-    const d = entry.data;
-    return {
-      genres: d?.genres?.map(g => g.description) ?? [],
-      adult:  (d?.content_descriptors?.ids ?? []).some(id => ADULT_DESCRIPTOR_IDS.has(id)),
-    };
+    const d = await res.json();
+    if (!d?.appid) return null;
+    // Tags: array of strings in individual appdetails
+    const tags = Array.isArray(d.tags) ? d.tags
+      : typeof d.tags === 'object' ? Object.keys(d.tags)
+      : [];
+    return { genre: d.genre ?? '', tags };
   } catch { return null; }
 }
 
 async function main() {
-  const pages = parseInt(process.argv[2] ?? '5', 10);
-  console.log(`Step 1 — Fetching ${pages} SteamSpy pages (~${pages * 1000} appids)...`);
+  const TARGET = parseInt(process.argv[2] ?? '2500', 10);
+  console.log(`Target: ${TARGET} games (sorted by CCU)\n`);
 
+  // ── Step 1: Fetch bulk pages for CCU data
+  console.log('Step 1 — Fetching SteamSpy bulk pages (CCU data)...');
   const allGames = {};
-  for (let p = 0; p < pages; p++) {
+  for (let p = 0; p < 5; p++) {
     process.stdout.write(`  Page ${p}... `);
-    const data = await fetchSteamSpyPage(p);
+    const data = await fetchBulkPage(p);
     console.log(`${Object.keys(data).length} games`);
     Object.assign(allGames, data);
-    if (p < pages - 1) await sleep(1500);
+    if (p < 4) await sleep(1500);
   }
 
-  const appids = Object.keys(allGames).map(Number).filter(Boolean);
-  console.log(`Total: ${appids.length} games`);
+  // ── Step 2: Sort by CCU descending, take top TARGET
+  const sorted = Object.values(allGames)
+    .filter(g => g.appid && g.name)
+    .sort((a, b) => (b.ccu ?? 0) - (a.ccu ?? 0))
+    .slice(0, TARGET);
 
+  console.log(`\nTop ${sorted.length} games by CCU (highest: ${sorted[0]?.name} ${sorted[0]?.ccu} CCU)`);
+
+  // ── Step 3: Init DB
   if (!existsSync(path.join(ROOT, 'data'))) mkdirSync(path.join(ROOT, 'data'));
-
   const db = new Database(DB_PATH);
   db.exec(`
-    CREATE TABLE IF NOT EXISTS games (
+    DROP TABLE IF EXISTS games;
+    CREATE TABLE games (
       appid   INTEGER PRIMARY KEY,
       name    TEXT    NOT NULL,
       genre   TEXT    DEFAULT '',
@@ -198,85 +208,75 @@ async function main() {
       adult   INTEGER NOT NULL DEFAULT 0,
       curated INTEGER NOT NULL DEFAULT 0
     );
-    CREATE INDEX IF NOT EXISTS idx_zone ON games(zone);
+    CREATE INDEX idx_zone ON games(zone);
   `);
 
   const curatedMap = new Map(CURATED.map(g => [g.appid, g]));
-
-  const insert = db.prepare(`
+  const insert     = db.prepare(`
     INSERT OR REPLACE INTO games (appid, name, genre, micro, meso, macro, zone, adult, curated)
     VALUES (@appid, @name, @genre, @micro, @meso, @macro, @zone, @adult, @curated)
   `);
+  const insertAll  = db.transaction(rows => { for (const r of rows) insert.run(r); });
 
-  // Step 2 — insert curated games first (exact scores, no Store fetch needed)
-  const insertAll = db.transaction(rows => { for (const r of rows) insert.run(r); });
-  const curatedRows = CURATED.map(c => ({
+  // ── Step 4: Insert curated games (exact scores, no fetch needed)
+  insertAll(CURATED.map(c => ({
     appid: c.appid, name: c.name, genre: '', micro: c.micro, meso: c.meso,
     macro: c.macro, zone: c.zone, adult: 0, curated: 1,
-  }));
-  insertAll(curatedRows);
-  console.log(`Inserted ${curatedRows.length} curated games.`);
+  })));
+  console.log(`Inserted ${CURATED.length} curated games.`);
 
-  // Step 3 — fetch genres + adult flag from Steam Store for non-curated games
-  const nonCurated = appids.filter(id => !curatedMap.has(id));
-  console.log(`\nStep 2 — Fetching Steam Store data for ${nonCurated.length} non-curated games...`);
-  console.log('  (batches of 5, 600ms delay — ~' + Math.ceil(nonCurated.length / 5 * 0.6 / 60) + ' min)');
+  // ── Step 5: Fetch SteamSpy appdetails for non-curated top games
+  const nonCurated = sorted.filter(g => !curatedMap.has(g.appid));
+  console.log(`\nStep 2 — Fetching SteamSpy appdetails for ${nonCurated.length} games...`);
+  console.log(`  Sequential, 1.1s per request (~${Math.ceil(nonCurated.length * 1.1 / 60)} min)\n`);
 
-  const BATCH = 5;
-  let inserted = 0, noData = 0;
+  let scored = 0, noData = 0;
+  const batch = [];
 
-  for (let i = 0; i < nonCurated.length; i += BATCH) {
-    const batch = nonCurated.slice(i, i + BATCH);
-    const results = await Promise.all(batch.map(id => fetchStoreData(id)));
+  for (let i = 0; i < nonCurated.length; i++) {
+    const g    = nonCurated[i];
+    const data = await fetchSpyDetails(g.appid);
 
-    const rows = [];
-    for (let j = 0; j < batch.length; j++) {
-      const appid = batch[j];
-      const g     = allGames[String(appid)];
-      const store = results[j];
-
-      if (!store) { noData++; continue; }
-
-      const genres = store.genres;
-      const est    = estimateFromGenres(genres);
-      if (!est) { noData++; continue; } // genre not in our scoring map
-
-      rows.push({
-        appid,
-        name:  g.name ?? '',
-        genre: genres.join(', '),
-        micro: est.micro,
-        meso:  est.meso,
-        macro: est.macro,
-        zone:  computeZone(est.micro, est.meso, est.macro),
-        adult: store.adult ? 1 : 0,
-        curated: 0,
-      });
-      inserted++;
+    if (!data) { noData++; }
+    else {
+      const est = estimateFromGenres(data.genre);
+      if (!est) { noData++; }
+      else {
+        const adult = data.tags.some(t => ADULT_TAGS.has(t)) ? 1 : 0;
+        batch.push({
+          appid: g.appid, name: g.name, genre: data.genre,
+          micro: est.micro, meso: est.meso, macro: est.macro,
+          zone: computeZone(est.micro, est.meso, est.macro),
+          adult, curated: 0,
+        });
+        scored++;
+      }
     }
 
-    if (rows.length) insertAll(rows);
+    // Flush batch every 50 rows
+    if (batch.length >= 50) { insertAll([...batch]); batch.length = 0; }
 
-    if ((i / BATCH) % 20 === 0) {
-      process.stdout.write(`  ${i}/${nonCurated.length} (${inserted} scored, ${noData} skipped)\r`);
+    if (i % 50 === 0 || i === nonCurated.length - 1) {
+      process.stdout.write(`  ${i + 1}/${nonCurated.length} — scored: ${scored}, skipped: ${noData}\r`);
     }
 
-    await sleep(600);
+    await sleep(1100); // ~1 req/s per SteamSpy guidelines
   }
 
-  console.log(`\nNon-curated scored: ${inserted}  No data/genre: ${noData}`);
+  if (batch.length) insertAll([...batch]);
+  console.log(`\n`);
 
-  // Ensure curated adult flag is correct (re-check their content descriptors)
-  console.log('\nDone. Stats:');
-  const total = db.prepare('SELECT COUNT(*) AS n FROM games').get().n;
-  const withScores = db.prepare('SELECT COUNT(*) AS n FROM games WHERE micro IS NOT NULL').get().n;
-  const adults = db.prepare('SELECT COUNT(*) AS n FROM games WHERE adult = 1').get().n;
-  console.log(`  Total rows: ${total}`);
-  console.log(`  With scores: ${withScores}`);
-  console.log(`  Flagged adult: ${adults}`);
-
+  // ── Stats
+  const total     = db.prepare('SELECT COUNT(*) AS n FROM games').get().n;
+  const withScore = db.prepare('SELECT COUNT(*) AS n FROM games WHERE micro IS NOT NULL').get().n;
+  const adults    = db.prepare('SELECT COUNT(*) AS n FROM games WHERE adult = 1').get().n;
+  console.log(`Done:`);
+  console.log(`  Total in DB:    ${total}`);
+  console.log(`  Scored:         ${withScore}  (${CURATED.length} curated + ${scored} estimated)`);
+  console.log(`  Adult flagged:  ${adults}`);
+  console.log(`  No data/genre:  ${noData}`);
   db.close();
-  console.log(`DB saved → ${DB_PATH}`);
+  console.log(`\nDB saved → ${DB_PATH}`);
 }
 
 main().catch(e => { console.error(e); process.exit(1); });
