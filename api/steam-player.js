@@ -1,3 +1,10 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+
+// Open DB once per warm function instance (readonly, no WAL needed)
+const db       = new Database(path.join(process.cwd(), 'data', 'games.db'), { readonly: true });
+const stmtGame = db.prepare('SELECT micro, meso, macro, zone, adult, curated FROM games WHERE appid = ?');
+
 export default async function handler(req, res) {
   const apiKey = process.env.STEAM_API_KEY;
   if (!apiKey) {
@@ -40,34 +47,25 @@ export default async function handler(req, res) {
     playtime: g.playtime_forever ?? 0,
   }));
 
-  // Top 20 most played — fetch genres + content descriptors for analysis
+  // Top 20 most played — enrich with DB scores (no Steam Store calls needed)
   const top20 = gameList
     .filter(g => g.playtime > 0)
     .sort((a, b) => b.playtime - a.playtime)
     .slice(0, 20);
 
-  let topGames = top20;
-  if (top20.length > 0) {
-    // Individual requests are far more reliable than batch — Steam's appdetails API
-    // silently drops games in a comma-separated batch, leaving most with empty genres.
-    const storeResults = await Promise.all(
-      top20.map(g =>
-        safeFetch(
-          `https://store.steampowered.com/api/appdetails?appids=${g.appid}&filters=genres,content_descriptors`,
-          5000
-        )
-      )
-    );
-    topGames = top20.map((g, i) => {
-      const entry = storeResults[i]?.[String(g.appid)];
-      const d     = entry?.success ? entry.data : null;
-      return {
-        ...g,
-        genres:               d?.genres?.map(x => x.description) ?? [],
-        contentDescriptorIds: d?.content_descriptors?.ids        ?? [],
-      };
-    });
-  }
+  const topGames = top20.map(g => {
+    const row = stmtGame.get(g.appid);
+    return {
+      ...g,
+      micro:   row?.micro   ?? null,
+      meso:    row?.meso    ?? null,
+      macro:   row?.macro   ?? null,
+      zone:    row?.zone    ?? null,
+      adult:   row?.adult   ?? 0,
+      curated: row?.curated ?? 0,
+      inDb:    !!row,
+    };
+  });
 
   res.setHeader('Cache-Control', 's-maxage=300');
   return res.status(200).json({

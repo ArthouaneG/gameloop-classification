@@ -305,7 +305,7 @@ function setupProfileSection() {
         return;
       }
 
-      const analysis = analyzePlaystyle(profile.topGames ?? [], GAMES);
+      const analysis = analyzePlaystyle(profile.topGames ?? []);
       if (!analysis) {
         result.innerHTML = `<p class="profile-error">${t('profile.result.nomatch')}</p>`;
         return;
