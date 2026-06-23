@@ -113,13 +113,13 @@ const CHART_GAMES = [
 
 /* ══ ZONE METADATA (colors + circle lists — labels come from t()) ══ */
 const ZONE_INFO = {
-  micro:        { color:'#00f5ff', circles:['micro'] },
-  macro:        { color:'#ffd700', circles:['macro'] },
-  meso:         { color:'#b14fff', circles:['meso'] },
-  'micro-macro':{ color:'#88e8ff', circles:['micro','macro'] },
-  'micro-meso': { color:'#9988ff', circles:['micro','meso'] },
-  'meso-macro': { color:'#cc88ff', circles:['meso','macro'] },
-  'all-three':  { color:'#ffffff', circles:['micro','meso','macro'] },
+  micro:        { color:'#78C0E0', circles:['micro'] },
+  macro:        { color:'#449DD1', circles:['macro'] },
+  meso:         { color:'#3943B7', circles:['meso'] },
+  'micro-macro':{ color:'#62BAE8', circles:['micro','macro'] },
+  'micro-meso': { color:'#5C82CC', circles:['micro','meso'] },
+  'meso-macro': { color:'#4070C4', circles:['meso','macro'] },
+  'all-three':  { color:'#a8d4f0', circles:['micro','meso','macro'] },
 };
 
 /* ══ SVG GEOMETRY ══ */
@@ -195,9 +195,9 @@ function renderProfileResult(profile, analysis) {
   function circleStyle(name) {
     const active = activeCircles.includes(name);
     const colors = {
-      micro: ['#00f5ff', 'rgba(0,245,255,0.22)', 'rgba(0,245,255,0.04)'],
-      macro: ['#ffd700', 'rgba(255,215,0,0.22)',  'rgba(255,215,0,0.04)'],
-      meso:  ['#b14fff', 'rgba(177,79,255,0.22)', 'rgba(177,79,255,0.04)'],
+      micro: ['#78C0E0', 'rgba(120,192,224,0.25)', 'rgba(120,192,224,0.06)'],
+      macro: ['#449DD1', 'rgba(68,157,209,0.25)',  'rgba(68,157,209,0.06)'],
+      meso:  ['#3943B7', 'rgba(57,67,183,0.28)',   'rgba(57,67,183,0.08)'],
     };
     const [stroke, activeFill, dimFill] = colors[name];
     return `stroke="${stroke}" stroke-width="${active ? 2.5 : 1}" fill="${active ? activeFill : dimFill}"`;
@@ -207,9 +207,9 @@ function renderProfileResult(profile, analysis) {
     <circle cx="68" cy="72" r="60" ${circleStyle('micro')}/>
     <circle cx="132" cy="72" r="60" ${circleStyle('macro')}/>
     <circle cx="100" cy="122" r="60" ${circleStyle('meso')}/>
-    <text x="14" y="18" fill="#00f5ff" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Micro</text>
-    <text x="186" y="18" fill="#ffd700" text-anchor="end" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Macro</text>
-    <text x="100" y="204" fill="#b14fff" text-anchor="middle" font-size="9" font-weight="700" font-family="'Segoe UI',sans-serif">Meso</text>
+    <text x="14" y="18" fill="#78C0E0" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Micro</text>
+    <text x="186" y="18" fill="#449DD1" text-anchor="end" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Macro</text>
+    <text x="100" y="204" fill="#3943B7" text-anchor="middle" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Meso</text>
   </svg>`;
 
   const goonerHtml = analysis.isGooner ? `
