@@ -114,11 +114,11 @@ const CHART_GAMES = [
 /* ══ ZONE METADATA (colors + circle lists — labels come from t()) ══ */
 const ZONE_INFO = {
   micro:        { color:'#78C0E0', circles:['micro'] },
-  macro:        { color:'#449DD1', circles:['macro'] },
-  meso:         { color:'#3943B7', circles:['meso'] },
-  'micro-macro':{ color:'#62BAE8', circles:['micro','macro'] },
-  'micro-meso': { color:'#5C82CC', circles:['micro','meso'] },
-  'meso-macro': { color:'#4070C4', circles:['meso','macro'] },
+  macro:        { color:'#3943B7', circles:['macro'] },
+  meso:         { color:'#A7A5C6', circles:['meso'] },
+  'micro-macro':{ color:'#5881CB', circles:['micro','macro'] },
+  'micro-meso': { color:'#8FB2D3', circles:['micro','meso'] },
+  'meso-macro': { color:'#7074BE', circles:['meso','macro'] },
   'all-three':  { color:'#a8d4f0', circles:['micro','meso','macro'] },
 };
 
@@ -196,8 +196,8 @@ function renderProfileResult(profile, analysis) {
     const active = activeCircles.includes(name);
     const colors = {
       micro: ['#78C0E0', 'rgba(120,192,224,0.25)', 'rgba(120,192,224,0.06)'],
-      macro: ['#449DD1', 'rgba(68,157,209,0.25)',  'rgba(68,157,209,0.06)'],
-      meso:  ['#3943B7', 'rgba(57,67,183,0.28)',   'rgba(57,67,183,0.08)'],
+      macro: ['#3943B7', 'rgba(57,67,183,0.28)',   'rgba(57,67,183,0.08)'],
+      meso:  ['#A7A5C6', 'rgba(167,165,198,0.25)', 'rgba(167,165,198,0.06)'],
     };
     const [stroke, activeFill, dimFill] = colors[name];
     return `stroke="${stroke}" stroke-width="${active ? 2.5 : 1}" fill="${active ? activeFill : dimFill}"`;
@@ -208,8 +208,8 @@ function renderProfileResult(profile, analysis) {
     <circle cx="132" cy="72" r="60" ${circleStyle('macro')}/>
     <circle cx="100" cy="122" r="60" ${circleStyle('meso')}/>
     <text x="14" y="18" fill="#78C0E0" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Micro</text>
-    <text x="186" y="18" fill="#449DD1" text-anchor="end" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Macro</text>
-    <text x="100" y="204" fill="#3943B7" text-anchor="middle" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Meso</text>
+    <text x="186" y="18" fill="#3943B7" text-anchor="end" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Macro</text>
+    <text x="100" y="204" fill="#A7A5C6" text-anchor="middle" font-size="9" font-weight="700" font-family="'Space Grotesk','Segoe UI',sans-serif">Meso</text>
   </svg>`;
 
   const goonerHtml = analysis.isGooner ? `
